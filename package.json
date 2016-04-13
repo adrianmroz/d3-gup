@@ -9,8 +9,9 @@
   },
   "peerDependencies": {
     "d3": ">=3.5"
-  }, 
+  },
   "devDependencies": {
+    "babel-cli": "^6.7.5",
     "babel-plugin-transform-object-rest-spread": "^6.6.5",
     "babel-preset-es2015": "^6.1.18"
   },
