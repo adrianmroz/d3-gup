@@ -3,7 +3,7 @@
   "description": "Utility functions for keeping your code dry, when using General Update Pattern for d3.js",
   "author": "Adrian Mróź",
   "license": "MIT",
-  "main": "dist/index.js"
+  "main": "dist/index.js",
   "dependencies": {
     "ramda": "^0.21.0"
   },
