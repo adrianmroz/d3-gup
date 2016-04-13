@@ -2,7 +2,7 @@ export {
   join,
   join2,
   gup
-} from './src/gup';
+} from './gup';
 
 export {
   call,
@@ -10,16 +10,16 @@ export {
   on,
   order,
   sort
-} from './src/combinators';
+} from './combinators';
 
-export {default as transition} from './src/transition';
+export {default as transition} from './transition';
 
-export {h} from './src/vnode';
+export {h} from './vnode';
 
 export {
   a, div, h1, h2, h3, h4, h5, h6, li, ol, p, span, ul
-} from './src/htmlTags';
+} from './htmlTags';
 
 export {
   clipPath, ellipse, g, line, path, rect, text, tspan
-} from './src/svgTags';
+} from './svgTags';
