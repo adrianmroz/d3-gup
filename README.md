@@ -12,7 +12,8 @@ import {gup, join, g, rect, on, call} from 'd3-gup';
 
 // first argument is selector and uses css syntax
 // second argument is optional object of attributes, keys are attributes values
-// values could be primitives inserted into dom or functions, which in case of data join, will be called with bound data
+// values could be primitives inserted into dom or functions, which in case of data join, will be called 
+// with bound data
 const blackRectangle = rect('#black-rect', {fill: 'black', width: 100, height: 100});
 
 // rest arguments, after selector and attributes, are children
