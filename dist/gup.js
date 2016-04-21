@@ -41,7 +41,12 @@ var _join = function _join(dataFn, vNode) {
 
     enterTransform(enterSelection);
 
-    (0, _thread2.default)(selection, (0, _d3Fun.attr)(vNode.getBoundAttributes()), (0, _d3Fun.style)(vNode.getBoundStyles()), (0, _d3Fun.text)(vNode.getBoundTextContent()));
+    (0, _thread2.default)(selection, (0, _d3Fun.attr)(vNode.getBoundAttributes()), (0, _d3Fun.style)(vNode.getBoundStyles()));
+
+    var textContent = vNode.getBoundTextContent();
+    if (!(0, _ramda.isNil)(textContent)) {
+      (0, _d3Fun.text)(textContent, selection);
+    }
 
     vNode.getConstantChildren().forEach(function (child) {
       return (0, _thread2.default)(enterSelection, appendVNode(child), setSelector(child));
