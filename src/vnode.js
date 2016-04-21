@@ -92,7 +92,7 @@ function parseSelector(selector) {
 }
 
 const parseChildren = (children) => ({
-  boundChildren: children.filter((child) => !isVNode(child)),
+  boundChildren: children.filter((child) => !isVNode(child) && !is(String, child)),
   constantChildren: children.filter((child) => isVNode(child)),
   textChildren: children.filter(is(String))
 });
