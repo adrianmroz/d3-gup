@@ -1,5 +1,5 @@
 import {h} from './vnode';
-import {curry, identity, is} from 'ramda';
+import {curry, identity, is, isNil} from 'ramda';
 import {
   selectAll,
   data,
@@ -55,9 +55,13 @@ const _join =
       thread(
         selection,
         attr(vNode.getBoundAttributes()),
-        style(vNode.getBoundStyles()),
-        text(vNode.getBoundTextContent())
+        style(vNode.getBoundStyles())
       );
+
+      const textContent = vNode.getBoundTextContent();
+      if (!isNil(textContent)) {
+        text(textContent, selection);
+      }
 
       vNode.getConstantChildren()
         .forEach((child) =>
