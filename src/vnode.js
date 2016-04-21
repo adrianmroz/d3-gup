@@ -1,7 +1,7 @@
-import {is, pickBy, omit} from 'ramda';
+import {is, pickBy, omit, isNil} from 'ramda';
 
 class VNode {
-  constructor(selector, attributes, children) {
+  constructor(selector, attributes = {}, children = []) {
     Object.assign(this,
       {selector},
       parseSelector(selector),
@@ -61,6 +61,8 @@ class VNode {
 
 const isVNode = is(VNode);
 const isFunction = is(Function);
+const isString = is(String);
+const isChild = (value) => isVNode(value) || isFunction(value) || isString(value);
 
 function parseAttributes(attributes) {
   const functionPicker = pickBy((v) => isFunction(v));
@@ -92,9 +94,9 @@ function parseSelector(selector) {
 }
 
 const parseChildren = (children) => ({
-  boundChildren: children.filter((child) => !isVNode(child) && !is(String, child)),
+  boundChildren: children.filter((child) => !isVNode(child) && !isString(child)),
   constantChildren: children.filter((child) => isVNode(child)),
-  textChildren: children.filter(is(String))
+  textChildren: children.filter(isString)
 });
 
 /**
@@ -116,9 +118,11 @@ const parseChildren = (children) => ({
  * @returns {VNode} vNode definition
  */
 export const h = (selector, attributes, ...content) => {
-  const hasAttrs = !isFunction(attributes) && !isVNode(attributes);
-  return new VNode(
-    selector,
-    hasAttrs ? attributes : {},
-    hasAttrs ? content : [attributes, ...content]);
+  if (isNil(attributes)) {
+    return new VNode(selector);
+  }
+  if(isChild(attributes)) {
+    return new VNode(selector, {}, [attributes, ...content]);
+  }
+  return new VNode(selector, attributes, content)
 };
