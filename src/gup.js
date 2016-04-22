@@ -1,5 +1,5 @@
 import {h} from './vnode';
-import {curry, identity, is, isNil} from 'ramda';
+import {of, curry, identity, is, isNil} from 'ramda';
 import {
   selectAll,
   data,
@@ -113,3 +113,10 @@ export const join2 = (nodeData, keySelector, vNode, xf) =>
 export const gup = (parent, ...fns) =>
   fns.forEach((fn) => fn(parent));
 
+/**
+ * Creates new join representing nesting vNode inside parent. Uses (d) => [d] pattern
+ * @param vNode Node definition representing join
+ * @param xf Optional definition of enter/exit selections transformations
+ */
+export const nest = (vNode, xf) =>
+  _join(data(of), vNode, xf);
