@@ -1,4 +1,5 @@
-import {curryN} from 'ramda';
+import {compose, curryN} from 'ramda';
+import {call as d3call, on as d3on, order as d3order, sort as d3sort} from 'd3-fun';
 
 /**
  * call combinator - composes join with d3 call method
@@ -6,9 +7,7 @@ import {curryN} from 'ramda';
  * @param join join to be composed at
  */
 export const call = curryN(2,
-  (fn, join) =>
-    (selection) =>
-      join(selection).call(fn));
+  (fn, join) => compose(d3call(fn), join));
 
 /**
  * variable argument length call combinator - composes selection transformation with d3 call method
@@ -28,28 +27,28 @@ export const callv = (fn, ...args) =>
  * @param join Join to be composed
  */
 export const on = curryN(3,
-  (event, handler, join) =>
-    (selection) =>
-      join(selection).on(event, handler));
+  (event, handler, join) => compose(d3on(event, handler), join));
+
+const parallelClassed = (classDefinitions) =>
+  (selection) =>
+    Object.keys(classDefinitions)
+      .reduce((className, node) =>
+        node.classed(className, classDefinitions[className]), selection);
 
 /**
  * classed combinator - composes join with setting class value
- * @param classList String representing classes of element to be changed
- * @param value d3 classed function value attribute, bool or data -> bool
+ * @param classDefinition Object
+ *    keys are classNames, values are d3 classed function value attribute, bool or data -> bool
  * @param join Join to be composed
  */
-export const classed = curryN(3,
-  (classList, value, join) =>
-    (selection) =>
-      join(selection).classed(classList, value));
+export const classed = curryN(2,
+  (classDefinition, join) => compose(parallelClassed(classDefinition), join));
 
 /**
  * order combinator - composes join with ordering selection
  * @param join
  */
-export const order = (join) =>
-  (selection) =>
-    join(selection).order();
+export const order = (join) => compose(d3order, join);
 
 /**
  * sort combinator - composes join with sorting selection
@@ -57,6 +56,4 @@ export const order = (join) =>
  * @param join
  */
 export const sort = curryN(2,
-  (comparator, join) =>
-    (selection) =>
-      join(selection).sort(comparator));
+  (comparator, join) => compose(d3sort(comparator), join));
