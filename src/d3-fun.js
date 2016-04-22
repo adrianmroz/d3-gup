@@ -13,3 +13,7 @@ export const attr2 = invoker(2, 'attr');
 export const style = invoker(1, 'style');
 export const text = invoker(1, 'text');
 export const remove = invoker(0, 'remove');
+export const call = invoker(1, 'call');
+export const on = invoker(2, 'on');
+export const order = invoker(0, 'order');
+export const sort = invoker(1, 'sort');
