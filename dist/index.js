@@ -33,6 +33,12 @@ Object.defineProperty(exports, 'call', {
     return _combinators.call;
   }
 });
+Object.defineProperty(exports, 'callv', {
+  enumerable: true,
+  get: function get() {
+    return _combinators.callv;
+  }
+});
 Object.defineProperty(exports, 'classed', {
   enumerable: true,
   get: function get() {

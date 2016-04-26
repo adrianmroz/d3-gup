@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.sort = exports.order = exports.classed = exports.on = exports.call = undefined;
+exports.sort = exports.order = exports.classed = exports.on = exports.callv = exports.call = undefined;
 
 var _ramda = require('ramda');
 
@@ -17,6 +17,26 @@ var call = exports.call = (0, _ramda.curryN)(2, function (fn, join) {
     return join(selection).call(fn);
   };
 });
+
+/**
+ * variable argument length call combinator - composes selection transformation with d3 call method
+ *   accepts variable number of arguments (is not curried because of this)
+ * @param fn Function to be called on resulting selection
+ * @param args array of passed arguments to function fn
+ */
+var callv = exports.callv = function callv(fn) {
+  for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+    args[_key - 1] = arguments[_key];
+  }
+
+  return function (xf) {
+    return function (selection) {
+      var _xf;
+
+      return (_xf = xf(selection)).call.apply(_xf, [fn].concat(args));
+    };
+  };
+};
 
 /**
  * on combinator - composes join with registering handler on event
