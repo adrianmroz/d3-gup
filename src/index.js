@@ -6,6 +6,7 @@ export {
 
 export {
   call,
+  callv,
   classed,
   on,
   order,

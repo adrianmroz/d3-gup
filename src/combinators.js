@@ -11,6 +11,17 @@ export const call = curryN(2,
       join(selection).call(fn));
 
 /**
+ * variable argument length call combinator - composes selection transformation with d3 call method
+ *   accepts variable number of arguments (is not curried because of this)
+ * @param fn Function to be called on resulting selection
+ * @param args array of passed arguments to function fn
+ */
+export const callv = (fn, ...args) =>
+  (xf) =>
+    (selection) =>
+      xf(selection).call(fn, ...args);
+
+/**
  * on combinator - composes join with registering handler on event
  * @param event Event name
  * @param handler Handler function for event
