@@ -1,5 +1,11 @@
 import {compose, curryN} from 'ramda';
-import {call as d3call, on as d3on, order as d3order, sort as d3sort} from 'd3-fun';
+import {
+  call as d3call,
+  classed as d3classed,
+  on as d3on,
+  order as d3order,
+  sort as d3sort
+} from 'd3-fun';
 
 /**
  * call combinator - composes join with d3 call method
@@ -29,20 +35,14 @@ export const callv = (fn, ...args) =>
 export const on = curryN(3,
   (event, handler, join) => compose(d3on(event, handler), join));
 
-const parallelClassed = (classDefinitions) =>
-  (selection) =>
-    Object.keys(classDefinitions)
-      .reduce((className, node) =>
-        node.classed(className, classDefinitions[className]), selection);
-
 /**
  * classed combinator - composes join with setting class value
- * @param classDefinition Object
- *    keys are classNames, values are d3 classed function value attribute, bool or data -> bool
+ * @param classList
+ * @param value
  * @param join Join to be composed
  */
-export const classed = curryN(2,
-  (classDefinition, join) => compose(parallelClassed(classDefinition), join));
+export const classed = curryN(3,
+  (classList, value, join) => compose(d3classed(classList, value), join));
 
 /**
  * order combinator - composes join with ordering selection
