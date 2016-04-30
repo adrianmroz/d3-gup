@@ -1,8 +1,10 @@
 export {
-  join,
-  join2,
-  gup
+  gup,
+  gupAll,
+  nest
 } from './gup';
+
+export {default as join} from './join';
 
 export {
   call,
