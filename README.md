@@ -2,6 +2,59 @@
 
 Utility functions for keeping your code dry, when using General Update Pattern for d3.js
 
+#### Concepts
+
+This library uses two main concepts from d3.js good practises - General update pattern and data-selection join.
+Joins are created using ```join``` function. It's simplest form it accepts node definition and data.
+It returns a function which accepts ```selection``` from d3. In this function will be evaluated data join, e.g.
+there will be created new selection and data will be bound to it.
+Then, using node definition nodes will be created with attributes and children.
+
+In simplest form, this function could be called on some selection and will return new created selection.
+From there you could use any d3 api, because it will be standard d3 selection.
+There's simple helper for this in library - ```gup```.
+
+Nodes are defined using h function. It resembles hyperscript api with some differences due to d3 concepts.
+First parameter is required css selector for element, used to select elements by d3.
+Join ensures that entering elements will fulfil this selector.
+Currently selector don't conform to css syntax. It requires order - tagname, class names and id.
+Second parameter is object of attributes. Key is attribute name. Values can be any serializable type or function.
+If value is function, it should accept data and index and will be called for every update of data in join.
+Special key ```style``` is for defining style of element.
+It uses d3 ```style``` function and works just like attributes.
+Special key ```textContent``` is for defining text of node which depends on data (it uses d3 ```text```).
+Rest of parameters are children of node.
+It could be other node definition, String (it would be set as text of node), or transformation.
+Transformations will be called on created selection every time data updates.
+Especially join could be used as transformation for nesting nodes depending on parents data.
+
+Node definitions are just objects, so they can be manipulated using normal JavaScripts functions.
+Array and object spreads and map/filter/reduce are recommended to get quasi-immutable manipulators.
+
+Library introduces idea of selection transformation - ```xf``` for short.
+It's any function accepting d3 selection and returning one.
+Using them we can get lazy evaluation of dom manipulation functions and
+easier composition (just function composition).
+
+Library provides few transformation combinators for common d3 selection functions.
+It allows to functionally define and compose series of transformations on selections.
+Any combinator accepts as arguments specific parameters and at last position - current transformation.
+From there you could use ```pipe```, ```compose``` or ```thread``` to express intent with functional code.
+
+```join``` is basic function for obtaining first ```xf```
+
+```join``` accepts also options:
+
+* Transformations of each selection: enter, update, exit.
+These functions are called on corresponding selections when they're created.
+Most common use case for them are transitions
+* Data join indexing functions, used by d3 to identify nodes in join.
+* Css selector, used for inserting (instead of appending) entering nodes before other nodes
+
+There is ```gupAll``` function for calling sequence of transformations on parent selection.
+There is ```nest``` helper, which is just join with ```(d) => [d]``` function as data definition.
+It's common idiom for nesting that way nodes using d3.
+
 #### Usage
 
 ```javascript

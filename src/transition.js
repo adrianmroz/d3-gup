@@ -1,7 +1,7 @@
 import {map, nth} from 'ramda';
 
 /**
- * helper for creating optional enter/exit transitions for binds
+ * helper for creating optional enter/exit transitions for joins
  *
  * @param attrs Object, where keys are animated node attributes and
  *  values are arrays of two - start and end values of attribute transition
