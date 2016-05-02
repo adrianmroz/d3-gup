@@ -5,7 +5,7 @@ import {
   on as d3on,
   order as d3order,
   sort as d3sort
-} from 'd3-fun';
+} from './d3-fun';
 
 /**
  * call combinator - composes transformation with d3 call method
