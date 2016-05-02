@@ -1,4 +1,16 @@
-import {is, pickBy, omit, prop} from 'ramda';
+import {
+  always,
+  complement,
+  either,
+  filter,
+  is,
+  pickBy,
+  omit,
+  pipe,
+  prop,
+  reject,
+  unless
+} from 'ramda';
 import thread from './thread';
 
 // TODO: it's dummy implementation
@@ -35,50 +47,58 @@ export const h = (selector, attributes = {}, ...children) => ({
   children
 });
 
+
+const isFn = is(Function);
+const isStr = is(String);
+const isScalar = complement(isFn);
+const nil = always(null);
+
+const functionPicker = pickBy(isFn);
+const functionOrNil = unless(isFn, nil);
+
+const scalarPicker = pickBy(isScalar);
+const scalarOrNill = unless(isScalar, nil);
+
 const attributes = prop('attributes');
-
-const functionPicker = pickBy(is(Function));
-const scalarPicker = pickBy((v) => !is(Function, v));
-
 const textContentKey = 'textContent';
 const styleKey = 'style';
 
 export const boundAttributes = pipe(
   attributes,
-  omit(styleKey, textContentKey),
+  omit([styleKey, textContentKey]),
   functionPicker);
 
 export const boundStyle = pipe(
   attributes,
   prop(styleKey),
-  functionPicker);
+  functionOrNil);
 
 export const boundTextContent = pipe(
   attributes,
   prop(textContentKey),
-  functionPicker);
+  functionOrNil);
 
 export const constantAttributes = pipe(
   attributes,
-  omit(styleKey, textContentKey),
+  omit([styleKey, textContentKey]),
   scalarPicker);
 
 export const constantStyle = pipe(
   attributes,
   prop(styleKey),
-  scalarPicker);
+  scalarOrNill);
 
 const children = prop('children');
 
 export const boundChildren = pipe(
   children,
-  filter(is(Function)));
+  filter(isFn));
 
 export const constantChildren = pipe(
   children,
-  filter((child) => !is(Function, child) && !is(String, child)));
+  reject(either(isFn, isStr)));
 
 export const textChildren = pipe(
   children,
-  filter(is(String)));
+  filter(isStr));
 

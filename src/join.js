@@ -2,6 +2,7 @@ import {
   append,
   attr,
   attr2,
+  classed,
   data,
   data2,
   enter,
@@ -45,7 +46,7 @@ const insertNode = (vNode, insertSelector) => insert(prop('tagName', vNode), ins
 const setConstantProps = (vNode) => pipe(
   attr(constantAttributes(vNode)),
   style(constantStyle(vNode)),
-  text(textChildren(vNode)));
+  text(textChildren(vNode).join('')));
 
 /**
  * Joins data with vNode definition.
@@ -99,7 +100,7 @@ export default (joinData, vNode, {
           thread(
             enterSelection,
             appendVNode(child),
-            setConstantProps(vNode),
+            setConstantProps(child),
             setSelector(child)
           )
         );
