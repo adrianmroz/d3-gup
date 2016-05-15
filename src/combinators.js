@@ -1,4 +1,4 @@
-import {compose, curryN} from 'ramda';
+import {compose, curry} from 'ramda';
 import {
   call as d3call,
   classed as d3classed,
@@ -12,8 +12,8 @@ import {
  * @param {Function} fn Function to be called on resulting selection
  * @param {Function} xf Transformation to be composed at
  */
-export const call = curryN(2,
-  (fn, xf) => compose(d3call(fn), xf));
+export const call = curry((fn, xf) =>
+  compose(d3call(fn), xf));
 
 /**
  * variable argument length call combinator - composes selection transformation with d3 call method
@@ -32,8 +32,8 @@ export const callv = (fn, ...args) =>
  * @param {Function} handler Handler function for event
  * @param {Function} xf Transformation to be composed
  */
-export const on = curryN(3,
-  (event, handler, xf) => compose(d3on(event, handler), xf));
+export const on = curry((event, handler, xf) =>
+    compose(d3on(event, handler), xf));
 
 /**
  * classed combinator - composes transformation with setting class value
@@ -41,8 +41,8 @@ export const on = curryN(3,
  * @param {Function|Boolean} value
  * @param {Function} xf Transformation to be composed
  */
-export const classed = curryN(3,
-  (classList, value, xf) => compose(d3classed(classList, value), xf));
+export const classed = curry((classList, value, xf) =>
+  compose(d3classed(classList, value), xf));
 
 /**
  * order combinator - composes transformation with ordering selection
@@ -55,5 +55,5 @@ export const order = (xf) => compose(d3order, xf);
  * @param {Function} comparator Comparator function used to sort elements in selection
  * @param {Function} xf Transformation to be composed
  */
-export const sort = curryN(2,
-  (comparator, xf) => compose(d3sort(comparator), xf));
+export const sort = curry((comparator, xf) =>
+  compose(d3sort(comparator), xf));
