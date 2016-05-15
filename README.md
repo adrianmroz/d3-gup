@@ -12,7 +12,7 @@ Then, using node definition nodes will be created with attributes and children. 
 
 
 
-Nodes are defined using h function. It resembles hyperscript api with some differences due to d3 concepts.
+Nodes are defined using `h` function. It resembles hyperscript api with some differences due to d3 concepts.
 
 First parameter is required css selector for element, used to select elements by d3. Join ensures that entering elements will fulfil this selector. Currently selector don't conform to css syntax. It requires order - tagname, class names and id. 
 
@@ -90,6 +90,5 @@ call(someFunc, join([1,2,3], rect('.bar', {width: (d) => d * 100})));
 
 #### Todo
 
-- selector should be optional
-- handle `insert` in `enter`
-- vNodes should be just data, not objects
+- proper selector parsing and handling errors there
+- handle errors in h function
