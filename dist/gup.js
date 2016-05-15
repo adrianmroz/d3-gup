@@ -3,98 +3,51 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.gup = exports.join2 = exports.join = undefined;
-
-var _vnode = require('./vnode');
+exports.nest = exports.gup = exports.gupAll = undefined;
 
 var _ramda = require('ramda');
-
-var _d3Fun = require('./d3-fun');
 
 var _thread = require('./thread');
 
 var _thread2 = _interopRequireDefault(_thread);
 
+var _join = require('./join');
+
+var _join2 = _interopRequireDefault(_join);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var setSelector = (0, _ramda.curry)(function (vNode, selection) {
-  return (0, _thread2.default)(selection, (0, _d3Fun.classed)(vNode.getClassList().join(' '), true), (0, _d3Fun.attr2)('id', vNode.getId()));
-});
-
-var appendVNode = function appendVNode(vNode) {
-  return function (selection) {
-    return (0, _thread2.default)(selection, (0, _d3Fun.append)(vNode.getTagName()), (0, _d3Fun.attr)(vNode.getConstantAttributes()), (0, _d3Fun.style)(vNode.getConstantStyles()), (0, _d3Fun.text)(vNode.getTextChildren().join('')));
-  };
-};
-
-var _join = function _join(dataFn, vNode) {
-  var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-
-  var _ref$enterTransform = _ref.enterTransform;
-  var enterTransform = _ref$enterTransform === undefined ? _ramda.identity : _ref$enterTransform;
-  var _ref$exitTransform = _ref.exitTransform;
-  var exitTransform = _ref$exitTransform === undefined ? _ramda.identity : _ref$exitTransform;
-  return function (parent) {
-    var selection = (0, _thread2.default)(parent, (0, _d3Fun.selectAll)(vNode.getSelector()), dataFn);
-
-    var enterSelection = (0, _thread2.default)(selection, _d3Fun.enter, appendVNode(vNode), setSelector(vNode));
-
-    enterTransform(enterSelection);
-
-    (0, _thread2.default)(selection, (0, _d3Fun.attr)(vNode.getBoundAttributes()), (0, _d3Fun.style)(vNode.getBoundStyles()));
-
-    var textContent = vNode.getBoundTextContent();
-    if (!(0, _ramda.isNil)(textContent)) {
-      (0, _d3Fun.text)(textContent, selection);
-    }
-
-    vNode.getConstantChildren().forEach(function (child) {
-      return (0, _thread2.default)(enterSelection, appendVNode(child), setSelector(child));
-    });
-
-    vNode.getBoundChildren().forEach(function (child) {
-      return child(selection);
-    });
-
-    (0, _thread2.default)(selection, _d3Fun.exit, exitTransform, _d3Fun.remove);
-
-    return selection;
-  };
-};
-
-/**
- * Joins data with vNode definition.
- * @param nodeData Data for join. Accepts any type that could be handled by d3
- * @param vNode Node definition representing join
- * @param xf Optional definition of enter/exit selections transformations
- */
-var join = exports.join = function join(nodeData, vNode, xf) {
-  return _join((0, _d3Fun.data)(nodeData), vNode, xf);
-};
-
-/**
- * Joins data with vNode definition using data keySelector
- * @param nodeData Data for join. Accepts any type that could be handled by d3
- * @param keySelector Function used by d3 to join data elements with nodes
- * @param vNode Node definition representing join
- * @param xf Optional definition of enter/exit selections transformations
- */
-var join2 = exports.join2 = function join2(nodeData, keySelector, vNode, xf) {
-  return _join((0, _d3Fun.data2)(nodeData, keySelector), vNode, xf);
-};
 
 /**
  * Runs in sequence functions on d3 selection
  * D3Selection -> (D3Selection -> a) -> (D3Selection -> b) ...
- * @param parent D3Selection representing parent node
- * @param fns Functions of D3Selection to run
+ * @param {D3Selection} parent - selection representing parent node
+ * @param {Function[]} xfs  - Transformations of D3Selection to run
  */
-var gup = exports.gup = function gup(parent) {
-  for (var _len = arguments.length, fns = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-    fns[_key - 1] = arguments[_key];
+var gupAll = exports.gupAll = function gupAll(parent) {
+  for (var _len = arguments.length, xfs = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+    xfs[_key - 1] = arguments[_key];
   }
 
-  return fns.forEach(function (fn) {
+  return xfs.forEach(function (fn) {
     return fn(parent);
   });
 };
+
+/**
+ * Calls selection transformation on D3Selection and returns outcome
+ * @param {D3Selection} parent - selection representing parent node
+ * @param {Function} xf - Transformation of D3Selection
+ */
+var gup = exports.gup = (0, _ramda.curry)(function (parent, xf) {
+  return xf(parent);
+});
+
+/**
+ * Creates new join representing nesting vNode inside parent. Uses (d) => [d] pattern
+ * @param {Object} vNode - Node definition representing join
+ * @param {Object} options - Options for join
+ */
+var nest = exports.nest = function nest(vNode, options) {
+  return (0, _join2.default)(_ramda.of, vNode, options);
+};
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uL3NyYy9ndXAuanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7OztBQUFBOztBQUNBOzs7O0FBQ0E7Ozs7Ozs7Ozs7OztBQVFPLElBQU0sMEJBQVMsU0FBVCxNQUFTLENBQUMsTUFBRDtvQ0FBWTs7OztTQUNoQyxJQUFJLE9BQUosQ0FBWSxVQUFDLEVBQUQ7V0FBUSxHQUFHLE1BQUg7R0FBUjtDQURROzs7Ozs7O0FBUWYsSUFBTSxvQkFBTSxrQkFBTSxVQUFDLE1BQUQsRUFBUyxFQUFUO1NBQWdCLEdBQUcsTUFBSDtDQUFoQixDQUFaOzs7Ozs7O0FBT04sSUFBTSxzQkFBTyxTQUFQLElBQU8sQ0FBQyxLQUFELEVBQVEsT0FBUjtTQUNsQiwrQkFBUyxLQUFULEVBQWdCLE9BQWhCO0NBRGtCIiwiZmlsZSI6Imd1cC5qcyIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7b2YsIGN1cnJ5fSBmcm9tICdyYW1kYSc7XG5pbXBvcnQgdGhyZWFkIGZyb20gJy4vdGhyZWFkJztcbmltcG9ydCBqb2luIGZyb20gJy4vam9pbic7XG5cbi8qKlxuICogUnVucyBpbiBzZXF1ZW5jZSBmdW5jdGlvbnMgb24gZDMgc2VsZWN0aW9uXG4gKiBEM1NlbGVjdGlvbiAtPiAoRDNTZWxlY3Rpb24gLT4gYSkgLT4gKEQzU2VsZWN0aW9uIC0+IGIpIC4uLlxuICogQHBhcmFtIHtEM1NlbGVjdGlvbn0gcGFyZW50IC0gc2VsZWN0aW9uIHJlcHJlc2VudGluZyBwYXJlbnQgbm9kZVxuICogQHBhcmFtIHtGdW5jdGlvbltdfSB4ZnMgIC0gVHJhbnNmb3JtYXRpb25zIG9mIEQzU2VsZWN0aW9uIHRvIHJ1blxuICovXG5leHBvcnQgY29uc3QgZ3VwQWxsID0gKHBhcmVudCwgLi4ueGZzKSA9PlxuICB4ZnMuZm9yRWFjaCgoZm4pID0+IGZuKHBhcmVudCkpO1xuXG4vKipcbiAqIENhbGxzIHNlbGVjdGlvbiB0cmFuc2Zvcm1hdGlvbiBvbiBEM1NlbGVjdGlvbiBhbmQgcmV0dXJucyBvdXRjb21lXG4gKiBAcGFyYW0ge0QzU2VsZWN0aW9ufSBwYXJlbnQgLSBzZWxlY3Rpb24gcmVwcmVzZW50aW5nIHBhcmVudCBub2RlXG4gKiBAcGFyYW0ge0Z1bmN0aW9ufSB4ZiAtIFRyYW5zZm9ybWF0aW9uIG9mIEQzU2VsZWN0aW9uXG4gKi9cbmV4cG9ydCBjb25zdCBndXAgPSBjdXJyeSgocGFyZW50LCB4ZikgPT4geGYocGFyZW50KSk7XG5cbi8qKlxuICogQ3JlYXRlcyBuZXcgam9pbiByZXByZXNlbnRpbmcgbmVzdGluZyB2Tm9kZSBpbnNpZGUgcGFyZW50LiBVc2VzIChkKSA9PiBbZF0gcGF0dGVyblxuICogQHBhcmFtIHtPYmplY3R9IHZOb2RlIC0gTm9kZSBkZWZpbml0aW9uIHJlcHJlc2VudGluZyBqb2luXG4gKiBAcGFyYW0ge09iamVjdH0gb3B0aW9ucyAtIE9wdGlvbnMgZm9yIGpvaW5cbiAqL1xuZXhwb3J0IGNvbnN0IG5lc3QgPSAodk5vZGUsIG9wdGlvbnMpID0+XG4gIGpvaW4ob2YsIHZOb2RlLCBvcHRpb25zKTtcbiJdfQ==

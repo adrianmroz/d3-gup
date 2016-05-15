@@ -1,53 +1,79 @@
-### d3-gup
+## d3-gup
 
 Utility functions for keeping your code dry, when using General Update Pattern for d3.js
 
-#### Usage
+### Prerequisites
 
-```javascript
-// necessary improts
-import {gup, join, g, rect, on, call} from 'd3-gup';
+[Thinking in joins](https://bost.ocks.org/mike/join/)
 
-// gup uses hyperscript-like syntax for defining DOM nodes
+[General Update Pattern](https://bl.ocks.org/mbostock/3808218)​
 
-// first argument is selector and uses css syntax
-// second argument is optional object of attributes, keys are attributes values
-// values could be primitives inserted into dom or functions, which in case of data join, will be called 
-// with bound data
-const blackRectangle = rect('#black-rect', {fill: 'black', width: 100, height: 100});
+### Getting started
 
-// rest arguments, after selector and attributes, are children
-const rects = g('#words', rect('.rect-1', {fill: 'red'}, rect('.rect-2', {fill: 'blue'})));
+This library uses two main concepts from d3.js good practises - General update pattern and Data join. 
 
-// library is mainly used to join data with vNode in d3-way
-// basic function is join
-// attributes defined as functions get sense in joins only, so they can be called with current data
-const dataJoin = join([1,2,3], rect('.bar', {width: (x) => x * 100}));
+#### joins
 
-// join returns a functions :: D3Selection -> D3Selection
-// to invoke those function library provides function gup
-gup(d3.select(document.body), dataJoin);
-// you can think about it as runJoin function
+Data joins are created using `join` function. It accepts data (anything that could be data in `d3.js` library) and node definition.  It returns a function of d3 selection, so code joining data and DOM elements is created lazily. To actually run this code you need to call that function on your selection. You can do this using this library function `gup` or just passing d3 selection to this function. Nodes are defined using hyperscript like syntax - more details later.
 
-// joins of course can be nested and probably better if they use functions as data
-// just pass join as vNode child
-gup(d3.select(document.body),
-  join([[1,2,3]],
-    g('.chart', 
-      rect('.border'),
-      join((d) => [d],
-        rect('.bar', {width: (d) => d * 100}))
-    )))
-    
-// library provides few combinators to implement basic d3 oeprators
-// combinator takes existing join and returns new one, augmented with new behaviour
-call(someFunc, join([1,2,3], rect('.bar', {width: (d) => d * 100})));
+``` javascript
+const data = [1,2,3];
+const parent = d3.select('#parent');
 
-// if this join will be ran, after creating defined vNodes, it will call someFunc on them
+// creates join - for every element in data, there will be created a div
+const myJoin = join(data, div('.my-div', {textContent: (d) => 'data: ' + d}));
+
+// actually running the computation
+myJoin(parent)
+// because this function returns created selection, you can call any d3 code
+  .attr('color', 'red');
 ```
 
-#### Todo
+Library defines functions like join as *selection transformation* - a function taking selection and returning one. Join is one example of such function - it takes parent selection and returns created selection. Library provides some functions for manipulating such transformations.
 
-* selector should be optional
-* handle `insert` in `enter`
-* vNodes should be just data, not objects
+``` javascript
+const chart = join([1,2,3], div('.bar', {height: (d) => d * 100, width: 20}));
+
+d3.select(document.body).call(
+// you can use classed combinator to add class for your elements in join
+	classed('clickable', true, chart));
+```
+
+Now you can compose joins like regular functions and decorate them. You can pipe, compose or sequence any selection transformations. You can mix your joins with any other functions of d3 selections, like stateless components.
+
+### node definitions
+
+Nodes are defined using `h` function. It resembles hyperscript api with some differences due to `d3.js` concepts. Library provides common html/svg tag functions.
+
+First parameter is required css selector for element. (*Currently selector don't conform to css syntax. It requires order - tagname, class names and id*) 
+
+Second parameter is object of attributes. Key is attribute name. Values can be any serializable type or function. If value is a function, it should accept data and index and will be called for every update of data in join. (*Special key `style` is for defining style of element. It uses d3 `style` function and works just like attributes. Special key `textContent` is for defining text of node which depends on data).*
+
+Rest of parameters are children of node. Child could be other node definition, String (it would be set as text of node), or selection transformation. Transformations will be called on created selection every time data updates. 
+
+``` javascript
+const app = d3.select('#app');
+// Header definition - static node definition
+const header = span('.header', {color: 'blue'}, 'Some nice chart!');
+// Bars definition - another join, using parents data
+const bars = join(d => d, div('.bar', {height: d => d * 100}));
+
+// Chart definition
+const chart = join([[1, 2, 3, 4]], 
+                   div('.chart', {}, 
+                       // first child would be header
+                       header, 
+                       // later, there will be bars
+                       bars, 
+                       // And some static text
+                       'Little footnote'));
+
+app.call(chart);
+```
+
+As you can see, you can nest easly joins or simple nodes. Node definition are just plain objects and can be easly manipulated. You can create one generic node and customize it with changing it’s properties, or adding another child. Or you can manipulate sequences of nodes with map/filter/reduce.
+
+### Todo
+
+- proper selector parsing and handling errors there
+- handle errors in h function

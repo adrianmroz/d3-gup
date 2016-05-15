@@ -1,88 +1,17 @@
-import {is, pickBy, omit, isNil} from 'ramda';
-
-class VNode {
-  constructor(selector, attributes = {}, children = []) {
-    Object.assign(this,
-      {selector},
-      parseSelector(selector),
-      parseAttributes(attributes),
-      parseChildren(children)
-    );
-  }
-
-  getTagName() {
-    return this.tagName;
-  }
-
-  getSelector() {
-    return this.selector;
-  }
-
-  getId() {
-    return this.id;
-  }
-
-  getClassList() {
-    return this.classList;
-  }
-
-  getConstantAttributes() {
-    return this.constantAttributes.attributes;
-  }
-
-  getBoundAttributes() {
-    return this.boundAttributes.attributes;
-  }
-
-  getConstantStyles() {
-    return this.constantAttributes.style;
-  }
-
-  getBoundStyles() {
-    return this.boundAttributes.style;
-  }
-
-  getBoundTextContent() {
-    return this.boundAttributes.textContent;
-  }
-
-  getConstantChildren() {
-    return this.constantChildren;
-  }
-
-  getBoundChildren() {
-    return this.boundChildren;
-  }
-
-  getTextChildren() {
-    return this.textChildren;
-  }
-}
-
-const isVNode = is(VNode);
-const isFunction = is(Function);
-const isString = is(String);
-const isChild = (value) => isVNode(value) || isFunction(value) || isString(value);
-
-function parseAttributes(attributes) {
-  const functionPicker = pickBy((v) => isFunction(v));
-  const scalarPicker = pickBy((v) => !isFunction(v));
-
-  const {style, textContent} = attributes;
-  const attrs = omit(['style', 'textContent'], attributes);
-
-  return {
-    boundAttributes: {
-      attributes: functionPicker(attrs),
-      style: functionPicker(style || {}),
-      textContent: isFunction(textContent) ? textContent : undefined
-    },
-    constantAttributes: {
-      attributes: scalarPicker(attrs),
-      style: scalarPicker(style || {})
-    }
-  }
-}
+import {
+  always,
+  complement,
+  either,
+  filter,
+  is,
+  pickBy,
+  omit,
+  pipe,
+  prop,
+  reject,
+  unless
+} from 'ramda';
+import thread from './thread';
 
 // TODO: it's dummy implementation
 function parseSelector(selector) {
@@ -93,12 +22,6 @@ function parseSelector(selector) {
   return {tagName, classList, id: splitByHash[1] || null};
 }
 
-const parseChildren = (children) => ({
-  boundChildren: children.filter((child) => !isVNode(child) && !isString(child)),
-  constantChildren: children.filter((child) => isVNode(child)),
-  textChildren: children.filter(isString)
-});
-
 /**
  * hyperscript inspired virtual node constructor
  *
@@ -106,23 +29,75 @@ const parseChildren = (children) => ({
  *  use css selectors syntax
  *  currently should have proper order, i.e. tagname, classlist, id
  *  examples: div; div.className.otherClass; div.class#id; div#id;
- * @param attributes Optional object representing node attributes
+ * @param attributes Object representing node attributes
  *  due to d3 nature, attributes could be functions of
  *  data -> index -> attrValue form
  *  map keys should represent DOM attribute names
  *  also, 'textContent' attribute is supported for representing dynamic content of node
- * @param [content] Children of node.
+ * @param [children] Children of node.
  *  Strings will be concatenated and inserted as text node
  *  vNode definitions will be static children
  *  functions of parent selection will be evaluated dynamically
- * @returns {VNode} vNode definition
+ * @returns {Object} vNode definition
  */
-export const h = (selector, attributes, ...content) => {
-  if (isNil(attributes)) {
-    return new VNode(selector);
-  }
-  if(isChild(attributes)) {
-    return new VNode(selector, {}, [attributes, ...content]);
-  }
-  return new VNode(selector, attributes, content)
-};
+export const h = (selector, attributes = {}, ...children) => ({
+  selector,
+  ...parseSelector(selector),
+  attributes,
+  children
+});
+
+const isFn = is(Function);
+const isStr = is(String);
+const isScalar = complement(isFn);
+const nil = always(null);
+
+const functionPicker = pickBy(isFn);
+const functionOrNil = unless(isFn, nil);
+
+const scalarPicker = pickBy(isScalar);
+const scalarOrNill = unless(isScalar, nil);
+
+const attributes = prop('attributes');
+const textContentKey = 'textContent';
+const styleKey = 'style';
+
+export const boundAttributes = pipe(
+  attributes,
+  omit([styleKey, textContentKey]),
+  functionPicker);
+
+export const boundStyle = pipe(
+  attributes,
+  prop(styleKey),
+  functionOrNil);
+
+export const boundTextContent = pipe(
+  attributes,
+  prop(textContentKey),
+  functionOrNil);
+
+export const constantAttributes = pipe(
+  attributes,
+  omit([styleKey, textContentKey]),
+  scalarPicker);
+
+export const constantStyle = pipe(
+  attributes,
+  prop(styleKey),
+  scalarOrNill);
+
+const children = prop('children');
+
+export const boundChildren = pipe(
+  children,
+  filter(isFn));
+
+export const constantChildren = pipe(
+  children,
+  reject(either(isFn, isStr)));
+
+export const textChildren = pipe(
+  children,
+  filter(isStr));
+

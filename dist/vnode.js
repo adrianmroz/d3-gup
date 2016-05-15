@@ -3,121 +3,17 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.h = undefined;
+exports.textChildren = exports.constantChildren = exports.boundChildren = exports.constantStyle = exports.constantAttributes = exports.boundTextContent = exports.boundStyle = exports.boundAttributes = exports.h = undefined;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _ramda = require('ramda');
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _thread = require('./thread');
 
-var VNode = function () {
-  function VNode(selector) {
-    var attributes = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-    var children = arguments.length <= 2 || arguments[2] === undefined ? [] : arguments[2];
+var _thread2 = _interopRequireDefault(_thread);
 
-    _classCallCheck(this, VNode);
-
-    Object.assign(this, { selector: selector }, parseSelector(selector), parseAttributes(attributes), parseChildren(children));
-  }
-
-  _createClass(VNode, [{
-    key: 'getTagName',
-    value: function getTagName() {
-      return this.tagName;
-    }
-  }, {
-    key: 'getSelector',
-    value: function getSelector() {
-      return this.selector;
-    }
-  }, {
-    key: 'getId',
-    value: function getId() {
-      return this.id;
-    }
-  }, {
-    key: 'getClassList',
-    value: function getClassList() {
-      return this.classList;
-    }
-  }, {
-    key: 'getConstantAttributes',
-    value: function getConstantAttributes() {
-      return this.constantAttributes.attributes;
-    }
-  }, {
-    key: 'getBoundAttributes',
-    value: function getBoundAttributes() {
-      return this.boundAttributes.attributes;
-    }
-  }, {
-    key: 'getConstantStyles',
-    value: function getConstantStyles() {
-      return this.constantAttributes.style;
-    }
-  }, {
-    key: 'getBoundStyles',
-    value: function getBoundStyles() {
-      return this.boundAttributes.style;
-    }
-  }, {
-    key: 'getBoundTextContent',
-    value: function getBoundTextContent() {
-      return this.boundAttributes.textContent;
-    }
-  }, {
-    key: 'getConstantChildren',
-    value: function getConstantChildren() {
-      return this.constantChildren;
-    }
-  }, {
-    key: 'getBoundChildren',
-    value: function getBoundChildren() {
-      return this.boundChildren;
-    }
-  }, {
-    key: 'getTextChildren',
-    value: function getTextChildren() {
-      return this.textChildren;
-    }
-  }]);
-
-  return VNode;
-}();
-
-var isVNode = (0, _ramda.is)(VNode);
-var isFunction = (0, _ramda.is)(Function);
-var isString = (0, _ramda.is)(String);
-var isChild = function isChild(value) {
-  return isVNode(value) || isFunction(value) || isString(value);
-};
-
-function parseAttributes(attributes) {
-  var functionPicker = (0, _ramda.pickBy)(function (v) {
-    return isFunction(v);
-  });
-  var scalarPicker = (0, _ramda.pickBy)(function (v) {
-    return !isFunction(v);
-  });
-
-  var style = attributes.style;
-  var textContent = attributes.textContent;
-
-  var attrs = (0, _ramda.omit)(['style', 'textContent'], attributes);
-
-  return {
-    boundAttributes: {
-      attributes: functionPicker(attrs),
-      style: functionPicker(style || {}),
-      textContent: isFunction(textContent) ? textContent : undefined
-    },
-    constantAttributes: {
-      attributes: scalarPicker(attrs),
-      style: scalarPicker(style || {})
-    }
-  };
-}
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // TODO: it's dummy implementation
 function parseSelector(selector) {
@@ -128,18 +24,6 @@ function parseSelector(selector) {
   return { tagName: tagName, classList: classList, id: splitByHash[1] || null };
 }
 
-var parseChildren = function parseChildren(children) {
-  return {
-    boundChildren: children.filter(function (child) {
-      return !isVNode(child) && !isString(child);
-    }),
-    constantChildren: children.filter(function (child) {
-      return isVNode(child);
-    }),
-    textChildren: children.filter(isString)
-  };
-};
-
 /**
  * hyperscript inspired virtual node constructor
  *
@@ -147,27 +31,61 @@ var parseChildren = function parseChildren(children) {
  *  use css selectors syntax
  *  currently should have proper order, i.e. tagname, classlist, id
  *  examples: div; div.className.otherClass; div.class#id; div#id;
- * @param attributes Optional object representing node attributes
+ * @param attributes Object representing node attributes
  *  due to d3 nature, attributes could be functions of
  *  data -> index -> attrValue form
  *  map keys should represent DOM attribute names
  *  also, 'textContent' attribute is supported for representing dynamic content of node
- * @param [content] Children of node.
+ * @param [children] Children of node.
  *  Strings will be concatenated and inserted as text node
  *  vNode definitions will be static children
  *  functions of parent selection will be evaluated dynamically
- * @returns {VNode} vNode definition
+ * @returns {Object} vNode definition
  */
-var h = exports.h = function h(selector, attributes) {
-  for (var _len = arguments.length, content = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
-    content[_key - 2] = arguments[_key];
+var h = exports.h = function h(selector) {
+  for (var _len = arguments.length, children = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
+    children[_key - 2] = arguments[_key];
   }
 
-  if ((0, _ramda.isNil)(attributes)) {
-    return new VNode(selector);
-  }
-  if (isChild(attributes)) {
-    return new VNode(selector, {}, [attributes].concat(content));
-  }
-  return new VNode(selector, attributes, content);
+  var attributes = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+  return _extends({
+    selector: selector
+  }, parseSelector(selector), {
+    attributes: attributes,
+    children: children
+  });
 };
+
+var isFn = (0, _ramda.is)(Function);
+var isStr = (0, _ramda.is)(String);
+var isScalar = (0, _ramda.complement)(isFn);
+var nil = (0, _ramda.always)(null);
+
+var functionPicker = (0, _ramda.pickBy)(isFn);
+var functionOrNil = (0, _ramda.unless)(isFn, nil);
+
+var scalarPicker = (0, _ramda.pickBy)(isScalar);
+var scalarOrNill = (0, _ramda.unless)(isScalar, nil);
+
+var attributes = (0, _ramda.prop)('attributes');
+var textContentKey = 'textContent';
+var styleKey = 'style';
+
+var boundAttributes = exports.boundAttributes = (0, _ramda.pipe)(attributes, (0, _ramda.omit)([styleKey, textContentKey]), functionPicker);
+
+var boundStyle = exports.boundStyle = (0, _ramda.pipe)(attributes, (0, _ramda.prop)(styleKey), functionOrNil);
+
+var boundTextContent = exports.boundTextContent = (0, _ramda.pipe)(attributes, (0, _ramda.prop)(textContentKey), functionOrNil);
+
+var constantAttributes = exports.constantAttributes = (0, _ramda.pipe)(attributes, (0, _ramda.omit)([styleKey, textContentKey]), scalarPicker);
+
+var constantStyle = exports.constantStyle = (0, _ramda.pipe)(attributes, (0, _ramda.prop)(styleKey), scalarOrNill);
+
+var children = (0, _ramda.prop)('children');
+
+var boundChildren = exports.boundChildren = (0, _ramda.pipe)(children, (0, _ramda.filter)(isFn));
+
+var constantChildren = exports.constantChildren = (0, _ramda.pipe)(children, (0, _ramda.reject)((0, _ramda.either)(isFn, isStr)));
+
+var textChildren = exports.textChildren = (0, _ramda.pipe)(children, (0, _ramda.filter)(isStr));
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uL3NyYy92bm9kZS5qcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7QUFBQTs7QUFhQTs7Ozs7OztBQUdBLFNBQVMsYUFBVCxDQUF1QixRQUF2QixFQUFpQztBQUMvQixNQUFNLGNBQWMsU0FBUyxLQUFULENBQWUsR0FBZixDQUFkLENBRHlCO0FBRS9CLE1BQU0sY0FBYyxZQUFZLENBQVosRUFBZSxLQUFmLENBQXFCLEdBQXJCLENBQWQsQ0FGeUI7QUFHL0IsTUFBTSxVQUFVLFlBQVksQ0FBWixNQUFtQixFQUFuQixHQUF3QixLQUF4QixHQUFnQyxZQUFZLENBQVosQ0FBaEMsQ0FIZTtBQUkvQixNQUFNLFlBQVksWUFBWSxLQUFaLENBQWtCLENBQWxCLENBQVosQ0FKeUI7QUFLL0IsU0FBTyxFQUFDLGdCQUFELEVBQVUsb0JBQVYsRUFBcUIsSUFBSSxZQUFZLENBQVosS0FBa0IsSUFBbEIsRUFBaEMsQ0FMK0I7Q0FBakM7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBMEJPLElBQU0sZ0JBQUksU0FBSixDQUFJLENBQUMsUUFBRDtvQ0FBK0I7Ozs7TUFBcEIsbUVBQWE7O0FBQ3ZDO0tBQ0csY0FBYyxRQUFkO0FBQ0g7QUFDQTs7Q0FKZTs7QUFPakIsSUFBTSxPQUFPLGVBQUcsUUFBSCxDQUFQO0FBQ04sSUFBTSxRQUFRLGVBQUcsTUFBSCxDQUFSO0FBQ04sSUFBTSxXQUFXLHVCQUFXLElBQVgsQ0FBWDtBQUNOLElBQU0sTUFBTSxtQkFBTyxJQUFQLENBQU47O0FBRU4sSUFBTSxpQkFBaUIsbUJBQU8sSUFBUCxDQUFqQjtBQUNOLElBQU0sZ0JBQWdCLG1CQUFPLElBQVAsRUFBYSxHQUFiLENBQWhCOztBQUVOLElBQU0sZUFBZSxtQkFBTyxRQUFQLENBQWY7QUFDTixJQUFNLGVBQWUsbUJBQU8sUUFBUCxFQUFpQixHQUFqQixDQUFmOztBQUVOLElBQU0sYUFBYSxpQkFBSyxZQUFMLENBQWI7QUFDTixJQUFNLGlCQUFpQixhQUFqQjtBQUNOLElBQU0sV0FBVyxPQUFYOztBQUVDLElBQU0sNENBQWtCLGlCQUM3QixVQUQ2QixFQUU3QixpQkFBSyxDQUFDLFFBQUQsRUFBVyxjQUFYLENBQUwsQ0FGNkIsRUFHN0IsY0FINkIsQ0FBbEI7O0FBS04sSUFBTSxrQ0FBYSxpQkFDeEIsVUFEd0IsRUFFeEIsaUJBQUssUUFBTCxDQUZ3QixFQUd4QixhQUh3QixDQUFiOztBQUtOLElBQU0sOENBQW1CLGlCQUM5QixVQUQ4QixFQUU5QixpQkFBSyxjQUFMLENBRjhCLEVBRzlCLGFBSDhCLENBQW5COztBQUtOLElBQU0sa0RBQXFCLGlCQUNoQyxVQURnQyxFQUVoQyxpQkFBSyxDQUFDLFFBQUQsRUFBVyxjQUFYLENBQUwsQ0FGZ0MsRUFHaEMsWUFIZ0MsQ0FBckI7O0FBS04sSUFBTSx3Q0FBZ0IsaUJBQzNCLFVBRDJCLEVBRTNCLGlCQUFLLFFBQUwsQ0FGMkIsRUFHM0IsWUFIMkIsQ0FBaEI7O0FBS2IsSUFBTSxXQUFXLGlCQUFLLFVBQUwsQ0FBWDs7QUFFQyxJQUFNLHdDQUFnQixpQkFDM0IsUUFEMkIsRUFFM0IsbUJBQU8sSUFBUCxDQUYyQixDQUFoQjs7QUFJTixJQUFNLDhDQUFtQixpQkFDOUIsUUFEOEIsRUFFOUIsbUJBQU8sbUJBQU8sSUFBUCxFQUFhLEtBQWIsQ0FBUCxDQUY4QixDQUFuQjs7QUFJTixJQUFNLHNDQUFlLGlCQUMxQixRQUQwQixFQUUxQixtQkFBTyxLQUFQLENBRjBCLENBQWYiLCJmaWxlIjoidm5vZGUuanMiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQge1xuICBhbHdheXMsXG4gIGNvbXBsZW1lbnQsXG4gIGVpdGhlcixcbiAgZmlsdGVyLFxuICBpcyxcbiAgcGlja0J5LFxuICBvbWl0LFxuICBwaXBlLFxuICBwcm9wLFxuICByZWplY3QsXG4gIHVubGVzc1xufSBmcm9tICdyYW1kYSc7XG5pbXBvcnQgdGhyZWFkIGZyb20gJy4vdGhyZWFkJztcblxuLy8gVE9ETzogaXQncyBkdW1teSBpbXBsZW1lbnRhdGlvblxuZnVuY3Rpb24gcGFyc2VTZWxlY3RvcihzZWxlY3Rvcikge1xuICBjb25zdCBzcGxpdEJ5SGFzaCA9IHNlbGVjdG9yLnNwbGl0KCcjJyk7XG4gIGNvbnN0IHNwbGl0QnlEb3RzID0gc3BsaXRCeUhhc2hbMF0uc3BsaXQoJy4nKTtcbiAgY29uc3QgdGFnTmFtZSA9IHNwbGl0QnlEb3RzWzBdID09PSAnJyA/ICdkaXYnIDogc3BsaXRCeURvdHNbMF07XG4gIGNvbnN0IGNsYXNzTGlzdCA9IHNwbGl0QnlEb3RzLnNsaWNlKDEpO1xuICByZXR1cm4ge3RhZ05hbWUsIGNsYXNzTGlzdCwgaWQ6IHNwbGl0QnlIYXNoWzFdIHx8IG51bGx9O1xufVxuXG4vKipcbiAqIGh5cGVyc2NyaXB0IGluc3BpcmVkIHZpcnR1YWwgbm9kZSBjb25zdHJ1Y3RvclxuICpcbiAqIEBwYXJhbSBzZWxlY3RvciBTZWxlY3RvciBzdHJpbmcgdXNlZCBmb3IgZGF0YSBiaW5kaW5nIGFuZC9vciBjb25zdHJ1Y3Rpbmcgbm9kZVxuICogIHVzZSBjc3Mgc2VsZWN0b3JzIHN5bnRheFxuICogIGN1cnJlbnRseSBzaG91bGQgaGF2ZSBwcm9wZXIgb3JkZXIsIGkuZS4gdGFnbmFtZSwgY2xhc3NsaXN0LCBpZFxuICogIGV4YW1wbGVzOiBkaXY7IGRpdi5jbGFzc05hbWUub3RoZXJDbGFzczsgZGl2LmNsYXNzI2lkOyBkaXYjaWQ7XG4gKiBAcGFyYW0gYXR0cmlidXRlcyBPYmplY3QgcmVwcmVzZW50aW5nIG5vZGUgYXR0cmlidXRlc1xuICogIGR1ZSB0byBkMyBuYXR1cmUsIGF0dHJpYnV0ZXMgY291bGQgYmUgZnVuY3Rpb25zIG9mXG4gKiAgZGF0YSAtPiBpbmRleCAtPiBhdHRyVmFsdWUgZm9ybVxuICogIG1hcCBrZXlzIHNob3VsZCByZXByZXNlbnQgRE9NIGF0dHJpYnV0ZSBuYW1lc1xuICogIGFsc28sICd0ZXh0Q29udGVudCcgYXR0cmlidXRlIGlzIHN1cHBvcnRlZCBmb3IgcmVwcmVzZW50aW5nIGR5bmFtaWMgY29udGVudCBvZiBub2RlXG4gKiBAcGFyYW0gW2NoaWxkcmVuXSBDaGlsZHJlbiBvZiBub2RlLlxuICogIFN0cmluZ3Mgd2lsbCBiZSBjb25jYXRlbmF0ZWQgYW5kIGluc2VydGVkIGFzIHRleHQgbm9kZVxuICogIHZOb2RlIGRlZmluaXRpb25zIHdpbGwgYmUgc3RhdGljIGNoaWxkcmVuXG4gKiAgZnVuY3Rpb25zIG9mIHBhcmVudCBzZWxlY3Rpb24gd2lsbCBiZSBldmFsdWF0ZWQgZHluYW1pY2FsbHlcbiAqIEByZXR1cm5zIHtPYmplY3R9IHZOb2RlIGRlZmluaXRpb25cbiAqL1xuZXhwb3J0IGNvbnN0IGggPSAoc2VsZWN0b3IsIGF0dHJpYnV0ZXMgPSB7fSwgLi4uY2hpbGRyZW4pID0+ICh7XG4gIHNlbGVjdG9yLFxuICAuLi5wYXJzZVNlbGVjdG9yKHNlbGVjdG9yKSxcbiAgYXR0cmlidXRlcyxcbiAgY2hpbGRyZW5cbn0pO1xuXG5jb25zdCBpc0ZuID0gaXMoRnVuY3Rpb24pO1xuY29uc3QgaXNTdHIgPSBpcyhTdHJpbmcpO1xuY29uc3QgaXNTY2FsYXIgPSBjb21wbGVtZW50KGlzRm4pO1xuY29uc3QgbmlsID0gYWx3YXlzKG51bGwpO1xuXG5jb25zdCBmdW5jdGlvblBpY2tlciA9IHBpY2tCeShpc0ZuKTtcbmNvbnN0IGZ1bmN0aW9uT3JOaWwgPSB1bmxlc3MoaXNGbiwgbmlsKTtcblxuY29uc3Qgc2NhbGFyUGlja2VyID0gcGlja0J5KGlzU2NhbGFyKTtcbmNvbnN0IHNjYWxhck9yTmlsbCA9IHVubGVzcyhpc1NjYWxhciwgbmlsKTtcblxuY29uc3QgYXR0cmlidXRlcyA9IHByb3AoJ2F0dHJpYnV0ZXMnKTtcbmNvbnN0IHRleHRDb250ZW50S2V5ID0gJ3RleHRDb250ZW50JztcbmNvbnN0IHN0eWxlS2V5ID0gJ3N0eWxlJztcblxuZXhwb3J0IGNvbnN0IGJvdW5kQXR0cmlidXRlcyA9IHBpcGUoXG4gIGF0dHJpYnV0ZXMsXG4gIG9taXQoW3N0eWxlS2V5LCB0ZXh0Q29udGVudEtleV0pLFxuICBmdW5jdGlvblBpY2tlcik7XG5cbmV4cG9ydCBjb25zdCBib3VuZFN0eWxlID0gcGlwZShcbiAgYXR0cmlidXRlcyxcbiAgcHJvcChzdHlsZUtleSksXG4gIGZ1bmN0aW9uT3JOaWwpO1xuXG5leHBvcnQgY29uc3QgYm91bmRUZXh0Q29udGVudCA9IHBpcGUoXG4gIGF0dHJpYnV0ZXMsXG4gIHByb3AodGV4dENvbnRlbnRLZXkpLFxuICBmdW5jdGlvbk9yTmlsKTtcblxuZXhwb3J0IGNvbnN0IGNvbnN0YW50QXR0cmlidXRlcyA9IHBpcGUoXG4gIGF0dHJpYnV0ZXMsXG4gIG9taXQoW3N0eWxlS2V5LCB0ZXh0Q29udGVudEtleV0pLFxuICBzY2FsYXJQaWNrZXIpO1xuXG5leHBvcnQgY29uc3QgY29uc3RhbnRTdHlsZSA9IHBpcGUoXG4gIGF0dHJpYnV0ZXMsXG4gIHByb3Aoc3R5bGVLZXkpLFxuICBzY2FsYXJPck5pbGwpO1xuXG5jb25zdCBjaGlsZHJlbiA9IHByb3AoJ2NoaWxkcmVuJyk7XG5cbmV4cG9ydCBjb25zdCBib3VuZENoaWxkcmVuID0gcGlwZShcbiAgY2hpbGRyZW4sXG4gIGZpbHRlcihpc0ZuKSk7XG5cbmV4cG9ydCBjb25zdCBjb25zdGFudENoaWxkcmVuID0gcGlwZShcbiAgY2hpbGRyZW4sXG4gIHJlamVjdChlaXRoZXIoaXNGbiwgaXNTdHIpKSk7XG5cbmV4cG9ydCBjb25zdCB0ZXh0Q2hpbGRyZW4gPSBwaXBlKFxuICBjaGlsZHJlbixcbiAgZmlsdGVyKGlzU3RyKSk7XG5cbiJdfQ==
