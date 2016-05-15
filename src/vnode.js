@@ -47,7 +47,6 @@ export const h = (selector, attributes = {}, ...children) => ({
   children
 });
 
-
 const isFn = is(Function);
 const isStr = is(String);
 const isScalar = complement(isFn);

@@ -14,11 +14,17 @@ import {
 } from './d3-fun';
 
 import {
+  always,
+  forEach,
   identity,
   isNil,
   is,
+  join,
+  partialRight,
   pipe,
-  prop
+  prop,
+  uncurryN,
+  unless
 } from 'ramda';
 
 import {
@@ -31,22 +37,26 @@ import {
   constantStyle,
   textChildren
 } from './vnode';
+
 import thread from './thread';
 
-
-const setSelector = (vNode) => pipe(
-  classed(prop('classList', vNode).join(' '), true),
-  attr2('id', prop('id', vNode))
-);
-
-const appendVNode = (vNode) => append(prop('tagName', vNode));
-
-const insertNode = (vNode, insertSelector) => insert(prop('tagName', vNode), insertSelector);
+const dataFn = (joinData, keySelector) =>
+  is(Function, keySelector) ? data2(joinData, keySelector) : data(joinData);
 
 const setConstantProps = (vNode) => pipe(
+  classed(join(' ', prop('classList', vNode)), true),
+  attr2('id', prop('id', vNode)),
   attr(constantAttributes(vNode)),
   style(constantStyle(vNode)),
-  text(textChildren(vNode).join('')));
+  text(join('', textChildren(vNode))));
+
+const tagName = prop('tagName');
+const addNode = (vNode, insertSelector) =>
+  is(String, insertSelector) ? insert(tagName(vNode), insertSelector) : append(tagName(vNode));
+
+const introduceNode = uncurryN(3, (vNode, keySelector) => pipe(
+  addNode(vNode, keySelector),
+  setConstantProps(vNode)));
 
 /**
  * Joins data with vNode definition.
@@ -60,61 +70,47 @@ const setConstantProps = (vNode) => pipe(
  *   @param {String} insertSelector - css selector for inserting element on enter
  */
 export default (joinData, vNode, {
-    enterTransform = identity,
-    exitTransform = identity,
-    updateTransform = identity,
-    keySelector = null,
-    insertSelector = null
-    } = {}) =>
-    function(parent) {
-      const selection = thread(
-        parent,
-        selectAll(prop('selector', vNode)),
-        is(Function, keySelector) ? data2(joinData, keySelector) : data(joinData)
-      );
+  enterTransform = identity,
+  exitTransform = identity,
+  updateTransform = identity,
+  keySelector = null,
+  insertSelector = null
+  } = {}) =>
+  function(parent) {
+    const selection = thread(
+      parent,
+      selectAll(prop('selector', vNode)),
+      dataFn(joinData, keySelector));
 
-      const enterSelection = thread(
-        selection,
-        enter,
-        is(String, insertSelector) ? insertNode(vNode, insertSelector) : appendVNode(vNode),
-        setConstantProps(vNode),
-        setSelector(vNode)
-      );
+    const enterSelection = thread(
+      selection,
+      enter,
+      introduceNode(vNode, keySelector),
+      enterTransform);
 
-      enterTransform(enterSelection);
+    thread(
+      selection,
+      attr(boundAttributes(vNode)),
+      style(boundStyle(vNode)),
+      unless(always(isNil(boundTextContent(vNode))), text(boundTextContent(vNode))),
+      updateTransform);
 
-      thread(
-        selection,
-        attr(boundAttributes(vNode)),
-        style(boundStyle(vNode)),
-        updateTransform
-      );
+    thread(
+      vNode,
+      constantChildren,
+      forEach(partialRight(introduceNode, [null, enterSelection])));
 
-      const textContent = boundTextContent(vNode);
-      if(!isNil(textContent)) {
-        text(textContent, selection);
-      }
+    thread(
+      vNode,
+      boundChildren,
+      forEach(child => child(selection)));
 
-      constantChildren(vNode)
-        .forEach((child) =>
-          thread(
-            enterSelection,
-            appendVNode(child),
-            setConstantProps(child),
-            setSelector(child)
-          )
-        );
+    thread(
+      selection,
+      exit,
+      exitTransform,
+      remove);
 
-      boundChildren(vNode)
-        .forEach((child) => child(selection));
-
-      thread(
-        selection,
-        exit,
-        exitTransform,
-        remove
-      );
-
-      return selection;
-    };
+    return selection;
+  };
 
