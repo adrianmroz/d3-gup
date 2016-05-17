@@ -54,8 +54,8 @@ const tagName = prop('tagName');
 const addNode = (vNode, insertSelector) =>
   is(String, insertSelector) ? insert(tagName(vNode), insertSelector) : append(tagName(vNode));
 
-const introduceNode = uncurryN(3, (vNode, keySelector) => pipe(
-  addNode(vNode, keySelector),
+const introduceNode = uncurryN(3, (vNode, insertSelector) => pipe(
+  addNode(vNode, insertSelector),
   setConstantProps(vNode)));
 
 /**
@@ -85,7 +85,7 @@ export default (joinData, vNode, {
     const enterSelection = thread(
       selection,
       enter,
-      introduceNode(vNode, keySelector),
+      introduceNode(vNode, insertSelector),
       enterTransform);
 
     thread(
