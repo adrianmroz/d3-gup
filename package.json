@@ -1,6 +1,6 @@
 {
   "name": "d3-gup",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Utility functions for keeping your code dry, when using General Update Pattern for d3.js",
   "author": "Adrian Mróź",
   "license": "MIT",
