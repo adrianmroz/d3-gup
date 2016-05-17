@@ -26,7 +26,7 @@ var setConstantProps = function setConstantProps(vNode) {
 
 var tagName = (0, _ramda.prop)('tagName');
 var addNode = function addNode(vNode, insertSelector) {
-  return (0, _ramda.is)(String, insertSelector) ? insert(tagName(vNode), insertSelector) : (0, _d3Fun.append)(tagName(vNode));
+  return (0, _ramda.is)(String, insertSelector) ? (0, _d3Fun.insert)(tagName(vNode), insertSelector) : (0, _d3Fun.append)(tagName(vNode));
 };
 
 var introduceNode = (0, _ramda.uncurryN)(3, function (vNode, insertSelector) {
