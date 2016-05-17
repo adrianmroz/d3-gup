@@ -7,6 +7,7 @@ import {
   data2,
   enter,
   exit,
+  insert,
   remove,
   style,
   selectAll,
