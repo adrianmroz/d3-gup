@@ -26,11 +26,11 @@ var setConstantProps = function setConstantProps(vNode) {
 
 var tagName = (0, _ramda.prop)('tagName');
 var addNode = function addNode(vNode, insertSelector) {
-  return (0, _ramda.is)(String, insertSelector) ? insert(tagName(vNode), insertSelector) : (0, _d3Fun.append)(tagName(vNode));
+  return (0, _ramda.is)(String, insertSelector) ? (0, _d3Fun.insert)(tagName(vNode), insertSelector) : (0, _d3Fun.append)(tagName(vNode));
 };
 
-var introduceNode = (0, _ramda.uncurryN)(3, function (vNode, keySelector) {
-  return (0, _ramda.pipe)(addNode(vNode, keySelector), setConstantProps(vNode));
+var introduceNode = (0, _ramda.uncurryN)(3, function (vNode, insertSelector) {
+  return (0, _ramda.pipe)(addNode(vNode, insertSelector), setConstantProps(vNode));
 });
 
 /**
@@ -61,7 +61,7 @@ exports.default = function (joinData, vNode) {
   return function (parent) {
     var selection = (0, _thread2.default)(parent, (0, _d3Fun.selectAll)((0, _ramda.prop)('selector', vNode)), dataFn(joinData, keySelector));
 
-    var enterSelection = (0, _thread2.default)(selection, _d3Fun.enter, introduceNode(vNode, keySelector), enterTransform);
+    var enterSelection = (0, _thread2.default)(selection, _d3Fun.enter, introduceNode(vNode, insertSelector), enterTransform);
 
     (0, _thread2.default)(selection, (0, _d3Fun.attr)((0, _vnode.boundAttributes)(vNode)), (0, _d3Fun.style)((0, _vnode.boundStyle)(vNode)), (0, _ramda.unless)((0, _ramda.always)((0, _ramda.isNil)((0, _vnode.boundTextContent)(vNode))), (0, _d3Fun.text)((0, _vnode.boundTextContent)(vNode))), updateTransform);
 
