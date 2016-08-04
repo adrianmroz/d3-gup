@@ -4,6 +4,7 @@ import {invoker} from 'ramda';
 export const selectAll = invoker(1, 'selectAll');
 export const data = invoker(1, 'data');
 export const data2 = invoker(2, 'data');
+export const each = invoker(1, 'each');
 export const enter = invoker(0, 'enter');
 export const exit = invoker(0, 'exit');
 export const append = invoker(1, 'append');

@@ -2,6 +2,7 @@ import {compose, curry} from 'ramda';
 import {
   call as d3call,
   classed as d3classed,
+  each as d3each,
   on as d3on,
   order as d3order,
   sort as d3sort
@@ -57,3 +58,11 @@ export const order = (xf) => compose(d3order, xf);
  */
 export const sort = curry((comparator, xf) =>
   compose(d3sort(comparator), xf));
+
+/**
+ * each combinator - composes transformation with function called on each selection element
+ * @param {Function} fn Function to be called on elements in selection
+ * @param {Function} xf Transformation to be composed
+ */
+export const each = curry((fn, xf) =>
+  compose(d3each(fn), xf));

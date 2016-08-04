@@ -10,6 +10,7 @@ export {
   call,
   callv,
   classed,
+  each,
   on,
   order,
   sort
