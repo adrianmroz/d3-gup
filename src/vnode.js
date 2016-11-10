@@ -12,15 +12,7 @@ import {
   unless
 } from 'ramda';
 import thread from './thread';
-
-// TODO: it's dummy implementation
-function parseSelector(selector) {
-  const splitByHash = selector.split('#');
-  const splitByDots = splitByHash[0].split('.');
-  const tagName = splitByDots[0] === '' ? 'div' : splitByDots[0];
-  const classList = splitByDots.slice(1);
-  return {tagName, classList, id: splitByHash[1] || null};
-}
+import parseSelector from './parseSelector';
 
 /**
  * hyperscript inspired virtual node constructor
