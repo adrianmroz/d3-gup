@@ -56,7 +56,6 @@ const functionPicker = pickBy(isFn);
 const functionOrNil = unless(isFn, nil);
 
 const scalarPicker = pickBy(isScalar);
-const scalarOrNill = unless(isScalar, nil);
 
 const attributes = prop('attributes');
 const textContentKey = 'textContent';
@@ -70,7 +69,7 @@ export const boundAttributes = pipe(
 export const boundStyle = pipe(
   attributes,
   prop(styleKey),
-  functionOrNil);
+  functionPicker);
 
 export const boundTextContent = pipe(
   attributes,
@@ -85,7 +84,7 @@ export const constantAttributes = pipe(
 export const constantStyle = pipe(
   attributes,
   prop(styleKey),
-  scalarOrNill);
+  scalarPicker);
 
 const children = prop('children');
 
